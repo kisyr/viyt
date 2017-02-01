@@ -1,0 +1,145 @@
+* {
+	margin: 0;
+	padding: 0;
+	border: 0;
+	outline: 0;
+	font-size: 1em;
+	line-height: 1em;
+	list-style: none;
+	background: transparent;
+	appearance: none;
+	box-sizing: border-box;
+}
+
+body {
+	overflow: hidden;
+}
+
+#app {
+	width: 100vw;
+	height: 100vh;
+	background-color: #000;
+	font-family: "Roboto", sans-serif;
+}
+
+.toggle-sidebar-videos,
+.toggle-sidebar-visualizers {
+	position: fixed;
+	top: 30px;
+	font-size: 30px;
+	color: #fff;
+	cursor: pointer;
+	z-index: 200;
+}
+
+.toggle-sidebar-videos {
+	left: 30px;
+}
+
+.toggle-sidebar-visualizers {
+	left: 90px;
+}
+
+.sidebar {
+	position: fixed;
+	top: 0;
+	left: -300px;
+	width: 300px;
+	height: 100vh;
+	padding: 90px 30px 30px 30px;
+	overflow: auto;
+	background-color: #111;
+	color: #fff;
+	opacity: 0;
+	z-index: -1;
+	transform: skew(-22deg, 0deg);
+
+	transition: left .2s, opacity .2s, transform .2s, z-index .2s;
+}
+
+.sidebar.open {
+	left: 0px;
+	opacity: 1;
+	transform: skew(0deg);
+	z-index: 100;
+}
+
+.sidebar::-webkit-scrollbar {
+	width: 2px;
+}
+ 
+.sidebar::-webkit-scrollbar-thumb {
+ 	background: #aaa;
+}
+
+.video-list form {
+	margin-bottom: 30px;
+	font-size: 2em;
+}
+
+.video-list form input {
+	width: 100%;
+	background-color: transparent;
+	color: #aaa;
+}
+
+.video-list form input:focus {
+	color: #fff;
+}
+
+.video-list ul {
+	font-size: .7em;
+	margin-bottom: 30px;
+}
+
+.video-list ul li {
+	margin: 0px -30px;
+	padding: 7.5px 30px;
+	overflow: hidden;
+	cursor: pointer;
+	color: #aaa;
+}
+
+.video-list ul li:hover {
+	background-color: #222;
+	color: #fff;
+}
+
+.video-list ul li:after {
+	content: "";
+	display: table;
+	clear: both;
+}
+
+.video-list ul li img {
+	display: block;
+	height: 2em;
+	float: left;
+	margin-right: 15px;
+}
+
+.video-list ul li span {
+	display: block;
+	line-height: 2em;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+.video-list button {
+	width: 100%;
+	padding: 5px;
+	background-color: #222;
+	color: #fff;
+	cursor: pointer;
+}
+
+.video-list button:hover {
+	background-color: #333;
+}
+
+.visualizer {
+	width: 100%;
+	height: 100vh;
+}
+

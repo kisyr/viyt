@@ -2,10 +2,10 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 
 
-class Overlay extends React.Component {
+class Sidebar extends React.Component {
 
 	render() {
-		const classes = 'overlay ' + (this.props.open ? 'open' : '');
+		const classes = 'sidebar ' + (this.props.open ? 'open' : '');
 		return (
 			<div className={classes}>
 				{this.props.children}
@@ -16,4 +16,4 @@ class Overlay extends React.Component {
 }
 
 
-export default Overlay;
+export default Sidebar;

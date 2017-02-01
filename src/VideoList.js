@@ -6,10 +6,7 @@ class VideoList extends React.Component {
 	constructor(props) {
 		super(props);
 		this.state = {
-			videos: [
-				{ title: 'video001' },
-				{ title: 'video002' },
-			],
+			videos: [],
 			query: '',
 			nextPageToken: null,
 		};
@@ -19,11 +16,14 @@ class VideoList extends React.Component {
 		return (
 			<div className="video-list">
 				<form onSubmit={this.search.bind(this)}>
-					<input type="text" ref="query" />
+					<input ref="query" placeholder="Search..." />
 				</form>
-				<ul onClick={this.select.bind(this)}>
+				<ul>
 					{this.state.videos.map((video, index) => (
-						<li key={index}>{video.title}</li>
+						<li key={index} data-id={video.id} onClick={() => {this.props.onSelect(video)}}>
+							<img src={video.thumbnail} />
+							<span>{video.title}</span>
+						</li>
 					))}
 				</ul>
 				{this.state.nextPageToken
@@ -41,7 +41,7 @@ class VideoList extends React.Component {
 			const videos = response.items.map(item => ({
 				id: item.id.videoId,
 				title: item.snippet.title,
-				thumbnail: item.snippet.thumbnails.high.url,
+				thumbnail: item.snippet.thumbnails.default.url,
 			}));
 			this.setState({
 				videos: this.state.videos.concat(videos),
@@ -59,11 +59,6 @@ class VideoList extends React.Component {
 		}, () => {
 			this.load();
 		});
-	}
-
-	select(event) {
-		event.preventDefault();
-		console.log(event.target);
 	}
 
 }
