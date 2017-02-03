@@ -11,6 +11,7 @@ class Visualizer extends React.Component {
 		this.state = {
 			width: 0,
 			height: 0,
+			elapsedTime: 0,
 			graphicsContext: null,
 			graphicsAnimation: null,
 			audioContext: null,
@@ -57,7 +58,7 @@ class Visualizer extends React.Component {
 				audioAnalyser,
 			});
 		}
-		if (nextProps.bindings != this.state.bindinds && nextProps.bindings) {
+		if (nextProps.bindings != this.props.bindings && nextProps.bindings) {
 			console.log('New bindings detected', nextProps.bindings);
 			var context = {
 				graphics: {
@@ -74,7 +75,9 @@ class Visualizer extends React.Component {
 			onInit();
 			var graphicsAnimation = null;
 			var graphicsAnimate = time => {
-				onAnimate(time / 1000);
+				const deltaTime = time - this.state.elapsedTime;
+				onAnimate(time / 1000, deltaTime / 1000);
+				this.setState({ elapsedTime: time });
 				graphicsAnimation = window.requestAnimationFrame(graphicsAnimate);
 			};
 			graphicsAnimate(0);

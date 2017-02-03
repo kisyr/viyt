@@ -30502,6 +30502,7 @@
 			this.audio.analyser.getByteFrequencyData(this.audio.frequencies);
 			this.bands.forEach(function (band) {
 				band.update(this.audio.frequencies);
+				console.log(band);
 			}, this);
 			this.beats.forEach(function (beat, i) {
 				beat.detector.update(deltaTime, this.bands[i].level);
@@ -30620,6 +30621,7 @@
 			_this.state = {
 				width: 0,
 				height: 0,
+				elapsedTime: 0,
 				graphicsContext: null,
 				graphicsAnimation: null,
 				audioContext: null,
@@ -30673,7 +30675,7 @@
 						audioAnalyser: audioAnalyser
 					});
 				}
-				if (nextProps.bindings != this.state.bindinds && nextProps.bindings) {
+				if (nextProps.bindings != this.props.bindings && nextProps.bindings) {
 					var context;
 					var graphicsAnimation;
 
@@ -30698,7 +30700,9 @@
 						graphicsAnimation = null;
 
 						_graphicsAnimate = function graphicsAnimate(time) {
-							onAnimate(time / 1000);
+							var deltaTime = time - _this2.state.elapsedTime;
+							onAnimate(time / 1000, deltaTime / 1000);
+							_this2.setState({ elapsedTime: time });
 							graphicsAnimation = window.requestAnimationFrame(_graphicsAnimate);
 						};
 
