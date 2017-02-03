@@ -97,7 +97,7 @@
 				sidebarVideosOpen: false,
 				sidebarVisualizersOpen: false,
 				streamUrl: null,
-				visualizer: null
+				visualizerBindings: null
 			};
 			_this.state.socket.on('dl.complete', function (data) {
 				_this.setState({ streamUrl: data.url });
@@ -131,7 +131,7 @@
 						{ className: 'toggle-sidebar-visualizers', onClick: this.toggleSidebarVisualizers.bind(this) },
 						_react2.default.createElement('i', { className: 'fa fa-bar-chart' })
 					),
-					this.state.streamUrl && _react2.default.createElement(_Visualizer2.default, { streamUrl: this.state.streamUrl, implementation: this.state.visualizer })
+					_react2.default.createElement(_Visualizer2.default, { audioStreamUrl: this.state.streamUrl, bindings: this.state.visualizerBindings })
 				);
 			}
 		}, {
@@ -157,8 +157,9 @@
 			}
 		}, {
 			key: 'selectVisualizer',
-			value: function selectVisualizer(visualizer) {
-				this.setState({ visualizer: visualizer });
+			value: function selectVisualizer(visualizerBindings) {
+				console.log(visualizerBindings);
+				this.setState({ visualizerBindings: visualizerBindings });
 			}
 		}]);
 
@@ -30617,41 +30618,111 @@
 			var _this = _possibleConstructorReturn(this, (Visualizer.__proto__ || Object.getPrototypeOf(Visualizer)).call(this, props));
 
 			_this.state = {
-				augr: null,
-				implementation: null
+				width: 0,
+				height: 0,
+				graphicsContext: null,
+				graphicsAnimation: null,
+				audioContext: null,
+				audioStream: null,
+				audioSource: null,
+				audioAnalyser: null
 			};
+			_this.resize = _this.resize.bind(_this);
 			return _this;
 		}
 
 		_createClass(Visualizer, [{
 			key: 'componentDidMount',
 			value: function componentDidMount() {
-				var _this2 = this;
-
+				var audioContext = new (window.AudioContext || window.webkitAudioContext)();
+				var graphicsCanvas = this.refs.graphicsCanvas;
+				var graphicsContext = graphicsCanvas.getContext('2d');
 				this.setState({
-					augr: new _Augr2.default({
-						element: this.refs.visualizer,
-						soundUrl: this.props.streamUrl,
-						on: null
-					})
-				}, function () {
-					_this2.state.augr.play();
+					graphicsContext: graphicsContext,
+					audioContext: audioContext
 				});
+				window.addEventListener('resize', this.resize);
+				window.dispatchEvent(new Event('resize'));
+			}
+		}, {
+			key: 'componentWillDismount',
+			value: function componentWillDismount() {
+				window.removeEventListener('resize', this.resize);
+				window.cancelAnimationFrame(this.state.graphicsAnimation);
 			}
 		}, {
 			key: 'componentWillReceiveProps',
 			value: function componentWillReceiveProps(nextProps) {
-				this.state.augr.rebind(nextProps.implementation);
-			}
-		}, {
-			key: 'shouldComponentUpdate',
-			value: function shouldComponentUpdate(nextProps, nextState) {
-				return false;
+				var _this2 = this;
+
+				if (this.props.audioStreamUrl != nextProps.audioStreamUrl) {
+					console.log('New stream detected', this.props.audioStreamUrl, nextProps.audioStreamUrl);
+					if (this.state.audioSource) {
+						this.state.audioStream.pause();
+						this.state.audioSource.disconnect();
+					}
+					var audioStream = new Audio(nextProps.audioStreamUrl);
+					var audioSource = this.state.audioContext.createMediaElementSource(audioStream);
+					var audioAnalyser = this.state.audioContext.createAnalyser();
+					audioSource.connect(this.state.audioContext.destination);
+					audioSource.connect(audioAnalyser);
+					audioStream.play();
+					this.setState({
+						audioStream: audioStream,
+						audioSource: audioSource,
+						audioAnalyser: audioAnalyser
+					});
+				}
+				if (nextProps.bindings != this.state.bindinds && nextProps.bindings) {
+					var context;
+					var graphicsAnimation;
+
+					var _graphicsAnimate;
+
+					(function () {
+						console.log('New bindings detected', nextProps.bindings);
+						context = {
+							graphics: {
+								canvas: _this2.refs.graphicsCanvas,
+								context: _this2.state.graphicsContext
+							},
+							audio: {
+								context: _this2.state.audioContext,
+								analyser: _this2.state.audioAnalyser
+							}
+						};
+
+						var onInit = nextProps.bindings.init.bind(context);
+						var onAnimate = nextProps.bindings.animate.bind(context);
+						onInit();
+						graphicsAnimation = null;
+
+						_graphicsAnimate = function graphicsAnimate(time) {
+							onAnimate(time / 1000);
+							graphicsAnimation = window.requestAnimationFrame(_graphicsAnimate);
+						};
+
+						_graphicsAnimate(0);
+						_this2.setState({ graphicsAnimation: graphicsAnimation });
+					})();
+				}
 			}
 		}, {
 			key: 'render',
 			value: function render() {
-				return _react2.default.createElement('div', { ref: 'visualizer', className: 'visualizer' });
+				return _react2.default.createElement(
+					'div',
+					{ className: 'visualizer', ref: 'visualizer' },
+					_react2.default.createElement('canvas', { width: this.state.width, height: this.state.height, ref: 'graphicsCanvas' })
+				);
+			}
+		}, {
+			key: 'resize',
+			value: function resize() {
+				this.setState({
+					width: this.refs.visualizer.offsetWidth,
+					height: this.refs.visualizer.offsetHeight
+				});
 			}
 		}]);
 

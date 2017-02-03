@@ -17,7 +17,7 @@ class App extends React.Component {
 			sidebarVideosOpen: false,
 			sidebarVisualizersOpen: false,
 			streamUrl: null,
-			visualizer: null,
+			visualizerBindings: null,
 		};
 		this.state.socket.on('dl.complete', (data) => {
 			this.setState({ streamUrl: data.url });
@@ -39,9 +39,7 @@ class App extends React.Component {
 				<button className="toggle-sidebar-visualizers" onClick={this.toggleSidebarVisualizers.bind(this)}>
 					<i className="fa fa-bar-chart"></i>
 				</button>
-				{this.state.streamUrl && 
-					<Visualizer streamUrl={this.state.streamUrl} implementation={this.state.visualizer} />
-				}
+				<Visualizer audioStreamUrl={this.state.streamUrl} bindings={this.state.visualizerBindings} />
 			</div>
 		);
 	}
@@ -64,8 +62,9 @@ class App extends React.Component {
 		this.state.socket.emit('dl.fetch', video.id);
 	}
 
-	selectVisualizer(visualizer) {
-		this.setState({ visualizer: visualizer });
+	selectVisualizer(visualizerBindings) {
+		console.log(visualizerBindings);
+		this.setState({ visualizerBindings });
 	}
 
 }
