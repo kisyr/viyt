@@ -30783,22 +30783,23 @@
 
 		_createClass(MediaControls, [{
 			key: 'componentDidMount',
-			value: function componentDidMount() {}
+			value: function componentDidMount() {
+				this.props.stream.removeEventListener('play', this.play);
+				this.props.stream.removeEventListener('pause', this.pause);
+				this.props.stream.removeEventListener('timeupdate', this.update);
+			}
 		}, {
 			key: 'componentWillUnmount',
-			value: function componentWillUnmount() {}
+			value: function componentWillUnmount() {
+				this.props.stream.addEventListener('play', this.play);
+				this.props.stream.addEventListener('pause', this.pause);
+				this.props.stream.addEventListener('timeupdate', this.update);
+			}
 		}, {
 			key: 'componentWillReceiveProps',
 			value: function componentWillReceiveProps(nextProps) {
 				console.log('MediaControls.componentWillReceiveProps', this.props, nextProps);
-				if (this.props.stream != nextProps.stream) {
-					this.props.stream.removeEventListener('play', this.play);
-					this.props.stream.removeEventListener('pause', this.pause);
-					this.props.stream.removeEventListener('timeupdate', this.update);
-					this.props.stream.addEventListener('play', this.play);
-					this.props.stream.addEventListener('pause', this.pause);
-					this.props.stream.addEventListener('timeupdate', this.update);
-				}
+				if (this.props.stream != nextProps.stream) {}
 			}
 		}, {
 			key: 'render',
