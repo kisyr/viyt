@@ -16,20 +16,20 @@ class MediaControls extends React.Component {
 	}
 
 	componentDidMount() {
+		this.props.stream.removeEventListener('play', this.play);
+		this.props.stream.removeEventListener('pause', this.pause);
+		this.props.stream.removeEventListener('timeupdate', this.update);
 	}
 
 	componentWillUnmount() {
+		this.props.stream.addEventListener('play', this.play);
+		this.props.stream.addEventListener('pause', this.pause);
+		this.props.stream.addEventListener('timeupdate', this.update);
 	}
 
 	componentWillReceiveProps(nextProps) {
 		console.log('MediaControls.componentWillReceiveProps', this.props, nextProps);
 		if (this.props.stream != nextProps.stream) {
-			this.props.stream.removeEventListener('play', this.play);
-			this.props.stream.removeEventListener('pause', this.pause);
-			this.props.stream.removeEventListener('timeupdate', this.update);
-			this.props.stream.addEventListener('play', this.play);
-			this.props.stream.addEventListener('pause', this.pause);
-			this.props.stream.addEventListener('timeupdate', this.update);
 		}
 	}
 
