@@ -35,7 +35,6 @@ export default {
 		this.audio.analyser.getByteFrequencyData(this.audio.frequencies);
 		this.bands.forEach(function(band) {
 			band.update(this.audio.frequencies);
-			console.log(band);
 		}, this);
 		this.beats.forEach(function(beat, i) {
 			beat.detector.update(deltaTime, this.bands[i].level);

@@ -1,7 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 
-import Augr from './Augr.js';
+import MediaControls from './MediaControls.js';
 
 
 class Visualizer extends React.Component {
@@ -89,6 +89,9 @@ class Visualizer extends React.Component {
 		return (
 			<div className="visualizer" ref="visualizer">
 				<canvas width={this.state.width} height={this.state.height} ref="graphicsCanvas"></canvas>
+				{this.state.audioStream && 
+					<MediaControls stream={this.state.audioStream} />
+				}
 			</div>
 		);
 	}

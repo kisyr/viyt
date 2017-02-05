@@ -30502,7 +30502,6 @@
 			this.audio.analyser.getByteFrequencyData(this.audio.frequencies);
 			this.bands.forEach(function (band) {
 				band.update(this.audio.frequencies);
-				console.log(band);
 			}, this);
 			this.beats.forEach(function (beat, i) {
 				beat.detector.update(deltaTime, this.bands[i].level);
@@ -30598,9 +30597,9 @@
 
 	var _reactDom2 = _interopRequireDefault(_reactDom);
 
-	var _Augr = __webpack_require__(240);
+	var _MediaControls = __webpack_require__(240);
 
-	var _Augr2 = _interopRequireDefault(_Augr);
+	var _MediaControls2 = _interopRequireDefault(_MediaControls);
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -30717,7 +30716,8 @@
 				return _react2.default.createElement(
 					'div',
 					{ className: 'visualizer', ref: 'visualizer' },
-					_react2.default.createElement('canvas', { width: this.state.width, height: this.state.height, ref: 'graphicsCanvas' })
+					_react2.default.createElement('canvas', { width: this.state.width, height: this.state.height, ref: 'graphicsCanvas' }),
+					this.state.audioStream && _react2.default.createElement(_MediaControls2.default, { stream: this.state.audioStream })
 				);
 			}
 		}, {
@@ -30737,7 +30737,7 @@
 
 /***/ },
 /* 240 */
-/***/ function(module, exports) {
+/***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
@@ -30745,80 +30745,124 @@
 		value: true
 	});
 
-	exports.default = function (options) {
+	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-		var self = this;
-		var AudioContext = window.AudioContext || window.webkitAudioContext;
+	var _react = __webpack_require__(1);
 
-		self.binds = null;
-		self.graphics = {};
-		self.audio = {};
-		self.elapsed = 0;
-		self.animation = null;
+	var _react2 = _interopRequireDefault(_react);
 
-		self.init = function () {
-			self.graphics.canvas = document.createElement('canvas');
-			self.graphics.context = self.graphics.canvas.getContext('2d');
+	var _reactDom = __webpack_require__(32);
 
-			self.audio.stream = new Audio(options.soundUrl);
-			self.audio.context = new AudioContext();
+	var _reactDom2 = _interopRequireDefault(_reactDom);
 
-			self.audio.analyser = self.audio.context.createAnalyser();
-			self.audio.source = self.audio.context.createMediaElementSource(self.audio.stream);
-			self.audio.source.connect(self.audio.context.destination);
-			self.audio.source.connect(self.audio.analyser);
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-			window.addEventListener('resize', self.resize);
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-			options.element.appendChild(self.graphics.canvas);
-			window.dispatchEvent(new Event('resize'));
+	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
 
-			self.rebind(options.on);
-		};
+	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
-		self.rebind = function (binds) {
-			self.binds = binds;
-			if (self.binds && self.binds.init) {
-				self.binds.init.call(self);
+	var MediaControls = function (_React$Component) {
+		_inherits(MediaControls, _React$Component);
+
+		function MediaControls(props) {
+			_classCallCheck(this, MediaControls);
+
+			var _this = _possibleConstructorReturn(this, (MediaControls.__proto__ || Object.getPrototypeOf(MediaControls)).call(this, props));
+
+			_this.state = {
+				playing: false
+			};
+			_this.play = _this.play.bind(_this);
+			_this.pause = _this.pause.bind(_this);
+			_this.update = _this.update.bind(_this);
+			_this.seek = _this.seek.bind(_this);
+			return _this;
+		}
+
+		_createClass(MediaControls, [{
+			key: 'componentDidMount',
+			value: function componentDidMount() {}
+		}, {
+			key: 'componentWillUnmount',
+			value: function componentWillUnmount() {}
+		}, {
+			key: 'componentWillReceiveProps',
+			value: function componentWillReceiveProps(nextProps) {
+				console.log('MediaControls.componentWillReceiveProps', this.props, nextProps);
+				if (this.props.stream != nextProps.stream) {
+					this.props.stream.removeEventListener('play', this.play);
+					this.props.stream.removeEventListener('pause', this.pause);
+					this.props.stream.removeEventListener('timeupdate', this.update);
+					this.props.stream.addEventListener('play', this.play);
+					this.props.stream.addEventListener('pause', this.pause);
+					this.props.stream.addEventListener('timeupdate', this.update);
+				}
 			}
-		};
+		}, {
+			key: 'render',
+			value: function render() {
+				var _this2 = this;
 
-		self.destroy = function () {
-			self.stop();
-			self.graphics.canvas.remove();
-		};
-
-		self.resize = function () {
-			self.graphics.canvas.width = options.element.offsetWidth;
-			self.graphics.canvas.height = options.element.offsetHeight;
-		};
-
-		self.animate = function (time) {
-			var delta = time - self.elapsed;
-			self.elapsed = time;
-			if (self.binds && self.binds.animate) {
-				self.binds.animate.call(self, time / 1000, delta / 1000);
+				return _react2.default.createElement(
+					'div',
+					{ className: 'media-controls' },
+					_react2.default.createElement(
+						'div',
+						{ className: 'controls' },
+						this.state.playing ? _react2.default.createElement(
+							'button',
+							{ onClick: function onClick() {
+									_this2.props.stream.pause();
+								} },
+							_react2.default.createElement('i', { className: 'fa fa-pause' })
+						) : _react2.default.createElement(
+							'button',
+							{ onClick: function onClick() {
+									_this2.props.stream.play();
+								} },
+							_react2.default.createElement('i', { className: 'fa fa-play' })
+						)
+					),
+					_react2.default.createElement(
+						'div',
+						{ className: 'progress' },
+						_react2.default.createElement('div', { className: 'progress-overlay', ref: 'progress' }),
+						_react2.default.createElement('div', { className: 'progress-seeker', ref: 'seeker', onClick: this.seek })
+					)
+				);
 			}
-			self.animation = window.requestAnimationFrame(self.animate);
-		};
+		}, {
+			key: 'play',
+			value: function play() {
+				this.setState({ playing: true });
+			}
+		}, {
+			key: 'pause',
+			value: function pause() {
+				this.setState({ playing: false });
+			}
+		}, {
+			key: 'seek',
+			value: function seek(event) {
+				var fraction = event.nativeEvent.offsetX / event.nativeEvent.target.offsetWidth;
+				var time = fraction * this.props.stream.duration;
+				this.props.stream.currentTime = time;
+			}
+		}, {
+			key: 'update',
+			value: function update() {
+				var fraction = this.props.stream.currentTime / this.props.stream.duration;
+				var width = fraction * 100 + '%';
+				this.refs.progress.style.width = width;
+			}
+		}]);
 
-		self.play = function () {
-			self.audio.stream.play();
-			window.requestAnimationFrame(self.animate);
-		};
+		return MediaControls;
+	}(_react2.default.Component);
 
-		self.stop = function () {
-			self.audio.stream.pause();
-			self.audio.stream.currentTime = 0;
-			window.cancelAnimationFrame(self.animation);
-		};
-
-		self.seek = function (time) {
-			self.audio.stream.currentTime = time;
-		};
-
-		self.init();
-	};
+	exports.default = MediaControls;
 
 /***/ }
 /******/ ]);
