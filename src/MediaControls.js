@@ -9,6 +9,8 @@ class MediaControls extends React.Component {
 		this.state = {
 			playing: false,
 		};
+		this.bind = this.bind.bind(this);
+		this.unbind = this.unbind.bind(this);
 		this.play = this.play.bind(this);
 		this.pause = this.pause.bind(this);
 		this.update = this.update.bind(this);
@@ -16,20 +18,17 @@ class MediaControls extends React.Component {
 	}
 
 	componentDidMount() {
-		this.props.stream.addEventListener('play', this.play);
-		this.props.stream.addEventListener('pause', this.pause);
-		this.props.stream.addEventListener('timeupdate', this.update);
+		this.bind(this.props.stream);
 	}
 
 	componentWillUnmount() {
-		this.props.stream.removeEventListener('play', this.play);
-		this.props.stream.removeEventListener('pause', this.pause);
-		this.props.stream.removeEventListener('timeupdate', this.update);
+		this.unbind(this.props.stream);
 	}
 
 	componentWillReceiveProps(nextProps) {
-		console.log('MediaControls.componentWillReceiveProps', this.props, nextProps);
 		if (this.props.stream != nextProps.stream) {
+			this.unbind(this.props.stream);
+			this.bind(nextProps.stream);
 		}
 	}
 
@@ -48,6 +47,18 @@ class MediaControls extends React.Component {
 				</div>
 			</div>
 		);
+	}
+
+	bind(stream) {
+		stream.addEventListener('play', this.play);
+		stream.addEventListener('pause', this.pause);
+		stream.addEventListener('timeupdate', this.update);
+	}
+
+	unbind(stream) {
+		stream.removeEventListener('play', this.play);
+		stream.removeEventListener('pause', this.pause);
+		stream.removeEventListener('timeupdate', this.update);
 	}
 
 	play() {
