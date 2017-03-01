@@ -62,7 +62,7 @@ class Visualizer extends React.Component {
 				audioAnalyser,
 			});
 		}
-		if (this.props.bindings && nextProps.bindings != nextProps.bindings) {
+		if (this.props.bindings != nextProps.bindings) {
 			console.log('New bindings detected', nextProps.bindings);
 			var context = {
 				graphics: {
