@@ -9,8 +9,10 @@ class Visualizer extends React.Component {
 	constructor(props) {
 		super(props);
 		this.state = {
-			width: 0,
-			height: 0,
+			dimensions: {
+				width: 0,
+				height: 0,
+			},
 			elapsedTime: 0,
 			graphicsContext: null,
 			graphicsAnimation: null,
@@ -20,6 +22,7 @@ class Visualizer extends React.Component {
 			audioAnalyser: null,
 		};
 		this.resize = this.resize.bind(this);
+		this.animate = this.animate.bind(this);
 	}
 
 	componentDidMount() {
@@ -32,6 +35,7 @@ class Visualizer extends React.Component {
 		});
 		window.addEventListener('resize', this.resize);
 		window.dispatchEvent(new Event('resize'));
+		this.animate(0);
 	}
 
 	componentWillDismount() {
@@ -58,7 +62,7 @@ class Visualizer extends React.Component {
 				audioAnalyser,
 			});
 		}
-		if (nextProps.bindings != this.props.bindings && nextProps.bindings) {
+		if (this.props.bindings && nextProps.bindings != nextProps.bindings) {
 			console.log('New bindings detected', nextProps.bindings);
 			var context = {
 				graphics: {
@@ -73,22 +77,26 @@ class Visualizer extends React.Component {
 			const onInit = nextProps.bindings.init.bind(context);
 			const onAnimate = nextProps.bindings.animate.bind(context);
 			onInit();
-			var graphicsAnimation = null;
-			var graphicsAnimate = time => {
-				const deltaTime = time - this.state.elapsedTime;
-				onAnimate(time / 1000, deltaTime / 1000);
-				this.setState({ elapsedTime: time });
-				graphicsAnimation = window.requestAnimationFrame(graphicsAnimate);
-			};
-			graphicsAnimate(0);
-			this.setState({ graphicsAnimation });
+			this.setState({
+				onAnimate,
+			});
 		}
+	}
+
+	shouldComponentUpdate(nextProps, nextState) {
+		if (this.state.audioStream !== nextState.audioStream) {
+			return true;
+		}
+		if (this.state.dimensions !== nextState.dimensions) {
+			return true;
+		}
+		return false;
 	}
 
 	render() {
 		return (
 			<div className="visualizer" ref="visualizer">
-				<canvas width={this.state.width} height={this.state.height} ref="graphicsCanvas"></canvas>
+				<canvas width={this.state.dimensions.width} height={this.state.dimensions.height} ref="graphicsCanvas"></canvas>
 				{this.state.audioStream && 
 					<MediaControls stream={this.state.audioStream} />
 				}
@@ -98,8 +106,22 @@ class Visualizer extends React.Component {
 
 	resize() {
 		this.setState({
-			width: this.refs.visualizer.offsetWidth,
-			height: this.refs.visualizer.offsetHeight,
+			dimensions: {
+				width: this.refs.visualizer.offsetWidth,
+				height: this.refs.visualizer.offsetHeight,
+			},
+		});
+	}
+
+	animate(time) {
+		const deltaTime = time - this.state.elapsedTime;
+		if (this.state.onAnimate) {
+			this.state.onAnimate(time / 1000, deltaTime / 1000);
+		}
+		const graphicsAnimation = window.requestAnimationFrame(this.animate);
+		this.setState({ 
+			graphicsAnimation,
+			elapsedTime: time,
 		});
 	}
 

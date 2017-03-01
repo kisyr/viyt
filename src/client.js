@@ -63,7 +63,6 @@ class App extends React.Component {
 	}
 
 	selectVisualizer(visualizerBindings) {
-		console.log(visualizerBindings);
 		this.setState({ visualizerBindings });
 	}
 
