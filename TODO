@@ -1,2 +1,6 @@
 * Fix visualizer rebindings on audio change
+* Sanitize ytdl results which sometimes crash server
+* Refactor server
+* Refactor visualizer
+* Add loading indicators
 
